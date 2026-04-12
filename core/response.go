@@ -34,6 +34,14 @@ func readInt64(data []byte) (int64, int, error) {
 	return val, pos + 2, nil
 }
 
+func readBulkString(data []byte) (string, int, error) {
+
+	pos := 1
+
+	len, delta := readLength(data[pos:])
+	pos += delta
+}
+
 func DecodeOne(data []byte) (interface{}, int, error) {
 
 	if len(data) == 0 {
