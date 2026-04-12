@@ -1,5 +1,10 @@
 package core
 
+/*
+*here we are returning the string, delta and the error
+delta will tell the size so pos + 2 is pos -> length from 0 till the pos + \r\n
+*
+*/
 func readSimpleString(data []byte) (string, int, error) {
 
 	pos := 1
@@ -9,4 +14,8 @@ func readSimpleString(data []byte) (string, int, error) {
 	}
 
 	return string(data[1:pos]), pos + 2, nil
+}
+
+func readError(data []byte) (string, int, error) {
+	return readSimpleString(data)
 }
