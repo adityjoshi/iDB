@@ -1,5 +1,7 @@
 package core
 
+import "errors"
+
 /*
 *here we are returning the string, delta and the error
 delta will tell the size so pos + 2 is pos -> length from 0 till the pos + \r\n
@@ -30,4 +32,33 @@ func readInt64(data []byte) (int64, int, error) {
 	}
 
 	return val, pos + 2, nil
+}
+
+func DecodeOne(data []byte) (interface{}, int, error) {
+
+	if len(data) == 0 {
+		return nil, 0, errors.New("no data")
+	}
+
+	switch data[0] {
+	case '+':
+		return readSimpleString(data)
+
+	case '-':
+		return readError(data)
+
+	case ':':
+		return readInt64(data)
+	}
+
+	return nil, 0, nil
+
+}
+
+func Decode(data []byte) (interface{}, error) {
+	if len(data) == 0 {
+		return nil, errors.New("no data")
+	}
+	val, _, err := DecodeOne(data)
+	return val, err
 }
