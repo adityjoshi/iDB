@@ -3,6 +3,9 @@ package main
 import (
 	"flag"
 	"log"
+
+	"github.com/adityjoshi/iDB/config"
+	"github.com/adityjoshi/iDB/server"
 )
 
 func setupFlags() {
@@ -13,15 +16,19 @@ func setupFlags() {
 
 func main() {
 	setupFlags()
+
 	log.Println(`
-	_____ _____ ____  
-  |_   _|  __ \  _ \ 
-    | | | |  | | |_) |
-    | | | |  | |  _ < 
-   _| |_| |__| | |_) |
-  |_____|_____/|____/ 
-	
+ _____ _____ ____  
+|_   _|  __ \  _ \ 
+  | | | |  | | |_) |
+  | | | |  | |  _ < 
+ _| |_| |__| | |_) |
+|_____|_____/|____/ 
+
+If Steve Jobs ever built a database, he’d call it iDB
+iDB started 🚨
 `)
-	log.Println("If Steve Jobs ever built a database, he’d call it iDB. iDB started.")
+
+	server.RunTcpServer()
 
 }
