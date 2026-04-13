@@ -58,6 +58,28 @@ func readBulkString(data []byte) (string, int, error) {
 	return string(data[pos:(pos + len)]), pos + len + 2, nil
 }
 
+func readArray(data []byte) (interface{}, int, error) {
+	pos := 1
+
+	count, delta := readLength(data[pos:])
+
+	pos += delta
+	var elements []interface{} = make([]interface{}, count)
+
+	for i := range elements {
+		elem, delta, err := DecodeOne(data[pos:])
+
+		if err != nil {
+			return nil, 0, err
+		}
+
+		elements[i] = elem
+		pos += delta
+
+	}
+	return elements, pos, nil
+}
+
 func DecodeOne(data []byte) (interface{}, int, error) {
 
 	if len(data) == 0 {
