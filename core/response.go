@@ -34,6 +34,20 @@ func readInt64(data []byte) (int64, int, error) {
 	return val, pos + 2, nil
 }
 
+func readLength(data []byte) (int, int) {
+	pos, length := 0, 0
+
+	for pos = range data {
+		b := data[pos]
+
+		if !(b >= '0' && b <= '9') {
+			return length, pos + 2
+		}
+		length = length*10 + int(b-'0')
+	}
+	return 0, 0
+}
+
 func readBulkString(data []byte) (string, int, error) {
 
 	pos := 1
