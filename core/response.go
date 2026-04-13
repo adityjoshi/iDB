@@ -40,6 +40,8 @@ func readBulkString(data []byte) (string, int, error) {
 
 	len, delta := readLength(data[pos:])
 	pos += delta
+
+	return string(data[pos:(pos + len)]), pos + len + 2, nil
 }
 
 func DecodeOne(data []byte) (interface{}, int, error) {
