@@ -80,6 +80,21 @@ func readArray(data []byte) (interface{}, int, error) {
 	return elements, pos, nil
 }
 
+func DecodeArrayString(data []byte) ([]string, error) {
+	val, err := Decode(data)
+	if err != nil {
+		return nil, err
+	}
+
+	tokesString := val.([]interface{})
+	tokens := make([]string, len(tokesString))
+
+	for i := range tokens {
+		tokens[i] = tokesString[i].(string)
+	}
+	return tokens, nil
+}
+
 func DecodeOne(data []byte) (interface{}, int, error) {
 
 	if len(data) == 0 {

@@ -30,11 +30,8 @@ func readCommand(c net.Conn) (*core.RedisCmd, error) {
 
 }
 
-func respond(cmd string, c net.Conn) error {
-	if _, err := c.Write([]byte(cmd)); err != nil {
-		return err
-	}
-	return nil
+func respond(cmd *core.RedisCmd, c net.Conn) {
+
 }
 
 func RunTcpServer() {
@@ -73,11 +70,8 @@ func RunTcpServer() {
 				log.Println("err", err)
 			}
 
-			log.Println("command", cmd)
+			respond(cmd, c)
 
-			if err = respond(cmd, c); err != nil {
-				log.Println("err write:", err)
-			}
 		}
 	}
 
