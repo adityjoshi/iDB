@@ -1,8 +1,25 @@
 package core
 
-import "net"
+import (
+	"errors"
+	"net"
+)
 
-func evalPing(args *RedisCmd, c net.Conn) {
+func evalPing(args []string, c net.Conn) error {
+	var b []byte
+
+	if len(args) >= 2 {
+		return errors.New("Err wrong number of argumnents")
+	}
+
+	if len(args) == 0 {
+		b = Encode("PONG", true)
+	} else {
+		b = Encode(args[0], false)
+	}
+
+	_, err := c.Write(b)
+	return err
 
 }
 
