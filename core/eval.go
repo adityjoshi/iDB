@@ -9,7 +9,7 @@ func evalPing(args []string, c net.Conn) error {
 	var b []byte
 
 	if len(args) >= 2 {
-		return errors.New("Err wrong number of argumnents")
+		return errors.New("Err wrong number of argumnents for ping command")
 	}
 
 	if len(args) == 0 {

@@ -1,6 +1,9 @@
 package core
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 /*
 *here we are returning the string, delta and the error
@@ -122,4 +125,17 @@ func Decode(data []byte) (interface{}, error) {
 	}
 	val, _, err := DecodeOne(data)
 	return val, err
+}
+
+func Encode(val interface{}, isSimple bool) []byte {
+	switch v := val.(type) {
+	case string:
+		if isSimple {
+			return []byte(fmt.Sprintf("+%s\r\n", v))
+		}
+		return []byte(fmt.Sprintf("$%d\r\n%s\r\n", len(v), v))
+
+	}
+
+	return []byte{}
 }
