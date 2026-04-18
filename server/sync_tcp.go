@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net"
@@ -30,8 +31,16 @@ func readCommand(c net.Conn) (*core.RedisCmd, error) {
 
 }
 
+func respondError(err error, c net.Conn) {
+	c.Write([]byte(fmt.Sprintf("-$s\r\n", err)))
+}
+
 func respond(cmd *core.RedisCmd, c net.Conn) {
 
+	err := core.EvaluateAndResponse(cmd, c)
+	if err != nil {
+		respondError(err, c)
+	}
 }
 
 func RunTcpServer() {
