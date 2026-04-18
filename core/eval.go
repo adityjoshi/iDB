@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"net"
 )
 
@@ -9,7 +8,7 @@ func evalPing(args []string, c net.Conn) error {
 	var b []byte
 
 	if len(args) >= 2 {
-		return errors.New("Err wrong number of argumnents for ping command")
+		c.Write([]byte("-Err wrong number of argumnents for ping command\r\n"))
 	}
 
 	if len(args) == 0 {
@@ -23,7 +22,7 @@ func evalPing(args []string, c net.Conn) error {
 
 }
 
-func EvaluateAndResponse(cmd *RedisCmd, c net.Conn) {
+func EvaluateAndResponse(cmd *RedisCmd, c net.Conn) error {
 
 	switch cmd.Cmd {
 

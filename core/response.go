@@ -83,21 +83,6 @@ func readArray(data []byte) (interface{}, int, error) {
 	return elements, pos, nil
 }
 
-func DecodeArrayString(data []byte) ([]string, error) {
-	val, err := Decode(data)
-	if err != nil {
-		return nil, err
-	}
-
-	tokesString := val.([]interface{})
-	tokens := make([]string, len(tokesString))
-
-	for i := range tokens {
-		tokens[i] = tokesString[i].(string)
-	}
-	return tokens, nil
-}
-
 func DecodeOne(data []byte) (interface{}, int, error) {
 
 	if len(data) == 0 {
@@ -113,6 +98,11 @@ func DecodeOne(data []byte) (interface{}, int, error) {
 
 	case ':':
 		return readInt64(data)
+
+	case '$':
+		return readBulkString(data)
+	case '*':
+		return readArray(data)
 	}
 
 	return nil, 0, nil
@@ -125,6 +115,21 @@ func Decode(data []byte) (interface{}, error) {
 	}
 	val, _, err := DecodeOne(data)
 	return val, err
+}
+
+func DecodeArrayString(data []byte) ([]string, error) {
+	val, err := Decode(data)
+	if err != nil {
+		return nil, err
+	}
+
+	tokesString := val.([]interface{})
+	tokens := make([]string, len(tokesString))
+
+	for i := range tokens {
+		tokens[i] = tokesString[i].(string)
+	}
+	return tokens, nil
 }
 
 func Encode(val interface{}, isSimple bool) []byte {
