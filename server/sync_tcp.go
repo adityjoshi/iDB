@@ -5,17 +5,29 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"strings"
 
 	"github.com/adityjoshi/iDB/config"
+	"github.com/adityjoshi/iDB/core"
 )
 
-func readCommand(c net.Conn) (string, error) {
+func readCommand(c net.Conn) (*core.RedisCmd, error) {
 	var buf []byte = make([]byte, 512)
 	n, err := c.Read(buf[:])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return string(buf[:n]), nil
+
+	tokens, err := core.DecodeArrayString(buf[:n])
+	if err != nil {
+		return nil, err
+	}
+
+	return &core.RedisCmd{
+		Cmd:  strings.ToUpper(tokens[0]),
+		Args: tokens[1:],
+	}, nil
+
 }
 
 func respond(cmd string, c net.Conn) error {
