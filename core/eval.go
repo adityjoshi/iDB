@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"io"
 )
 
@@ -8,7 +9,7 @@ func evalPing(args []string, c io.ReadWriter) error {
 	var b []byte
 
 	if len(args) >= 2 {
-		c.Write([]byte("-Err wrong number of argumnents for ping command\r\n"))
+		return errors.New("Err wrong number of argumnents for ping command\r\n")
 	}
 
 	if len(args) == 0 {

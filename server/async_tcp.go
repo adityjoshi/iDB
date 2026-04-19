@@ -36,4 +36,9 @@ func AsyncTcpServer() error {
 	}); err != nil {
 		return err
 	}
+
+	/*
+	* Async event creation
+	* */
+
 }
