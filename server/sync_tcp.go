@@ -12,7 +12,7 @@ import (
 	"github.com/adityjoshi/iDB/core"
 )
 
-func readCommand(c net.Conn) (*core.RedisCmd, error) {
+func readCommand(c io.ReadWriter) (*core.RedisCmd, error) {
 	var buf []byte = make([]byte, 512)
 	n, err := c.Read(buf[:])
 	if err != nil {
@@ -31,11 +31,11 @@ func readCommand(c net.Conn) (*core.RedisCmd, error) {
 
 }
 
-func respondError(err error, c net.Conn) {
-	c.Write([]byte(fmt.Sprintf("-$s\r\n", err)))
+func respondError(err error, c io.ReadWriter) {
+	c.Write([]byte(fmt.Sprintf("-%s\r\n", err)))
 }
 
-func respond(cmd *core.RedisCmd, c net.Conn) {
+func respond(cmd *core.RedisCmd, c io.ReadWriter) {
 
 	err := core.EvaluateAndResponse(cmd, c)
 	if err != nil {
@@ -50,7 +50,7 @@ func RunTcpServer() {
 
 	listner, err := net.Listen("tcp", config.Host+":"+strconv.Itoa(config.Port))
 	if err != nil {
-		panic(err)
+		log.Println("error", err)
 	}
 
 	for {
@@ -59,8 +59,9 @@ func RunTcpServer() {
 		* */
 		c, err := listner.Accept()
 		if err != nil {
-			panic(err)
+			log.Println("error", err)
 		}
+
 		connected_clients += 1
 
 		log.Println("client connected to the server with address:", c.RemoteAddr(), "Concurrent clients -> ", connected_clients)
@@ -71,12 +72,10 @@ func RunTcpServer() {
 			if err != nil {
 				c.Close()
 				connected_clients -= 1
-				log.Println("client disconnected", c.RemoteAddr(), "Concurrent client -> ", connected_clients)
 
 				if err == io.EOF {
 					break
 				}
-				log.Println("err", err)
 			}
 
 			respond(cmd, c)
