@@ -2,6 +2,7 @@ package server
 
 import (
 	"log"
+	"net"
 	"syscall"
 
 	"github.com/adityjoshi/iDB/config"
@@ -24,6 +25,15 @@ func AsyncTcpServer() error {
 	defer syscall.Close(serverFD)
 
 	if err = syscall.SetNonblock(serverFD, true); err != nil {
+		return err
+	}
+
+	ip4 := net.ParseIP(config.Host)
+
+	if err = syscall.Bind(serverFD, &syscall.SockaddrInet4{
+		Port: config.Port,
+		Addr: [4]byte{ip4[0], ip4[1], ip4[2], ip4[3]},
+	}); err != nil {
 		return err
 	}
 }
