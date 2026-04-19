@@ -22,4 +22,8 @@ func AsyncTcpServer() error {
 	}
 
 	defer syscall.Close(serverFD)
+
+	if err = syscall.SetNonblock(serverFD, true); err != nil {
+		return err
+	}
 }
