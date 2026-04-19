@@ -1,10 +1,10 @@
 package core
 
 import (
-	"net"
+	"io"
 )
 
-func evalPing(args []string, c net.Conn) error {
+func evalPing(args []string, c io.ReadWriter) error {
 	var b []byte
 
 	if len(args) >= 2 {
@@ -22,7 +22,7 @@ func evalPing(args []string, c net.Conn) error {
 
 }
 
-func EvaluateAndResponse(cmd *RedisCmd, c net.Conn) error {
+func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 
 	switch cmd.Cmd {
 
