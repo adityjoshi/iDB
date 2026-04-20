@@ -60,4 +60,12 @@ func AsyncTcpServer() error {
 		return err
 	}
 
+	for {
+
+		newEvents, err := syscall.Kevent(kqFD, nil, events[:], nil)
+		if err != nil {
+			return err
+		}
+	}
+
 }
