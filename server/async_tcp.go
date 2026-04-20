@@ -56,4 +56,8 @@ func AsyncTcpServer() error {
 		Flags:  syscall.EV_ADD,
 	}
 
+	if _, err = syscall.Kevent(kqFD, []syscall.Kevent_t{socketServerEvents}, nil, nil); err != nil {
+		return err
+	}
+
 }
