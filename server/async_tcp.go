@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/adityjoshi/iDB/config"
+	"github.com/adityjoshi/iDB/core"
 	"github.com/adityjoshi/iDB/server"
 	"github.com/twitchyliquid64/golang-asm/sys"
 )
@@ -85,10 +86,17 @@ func AsyncTcpServer() error {
 					Flags:  syscall.EV_ADD,
 				}
 
-				if err := syscall.Kevent(kqFD, syscall.EV_ADD, fd, &socketClientEvents); err != nil {
+				if _, err := syscall.Kevent(fd, []syscall.Kevent_t{socketClientEvents}, nil, nil); err != nil {
 					log.Fatal(err)
 				} else {
-
+					comm := core.FileDescriptor{FD: int(events[i].FD)}
+					cmd, err := readCommand(comm)
+					if err != nil {
+						syscall.Close(int(events[i].FD))
+						connected_clients -= 1
+						continue
+					}
+					respond(cmd, comm)
 				}
 			}
 		}
