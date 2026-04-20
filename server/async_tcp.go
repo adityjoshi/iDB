@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/adityjoshi/iDB/config"
+	"github.com/twitchyliquid64/golang-asm/sys"
 )
 
 var connected_clients int = 0
@@ -40,5 +41,19 @@ func AsyncTcpServer() error {
 	/*
 	* Async event creation
 	* */
+
+	kqFD, err := syscall.Kqueue()
+
+	if err != nil {
+		return err
+	}
+
+	defer syscall.Close(kqFD)
+
+	var socketServerEvents syscall.Kevent_t = syscall.Kevent_t{
+		Ident:  uint64(serverFD),
+		Filter: syscall.EVFILT_READ,
+		Flags:  syscall.EV_ADD,
+	}
 
 }
