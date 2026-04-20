@@ -7,32 +7,30 @@ import (
 
 	"github.com/adityjoshi/iDB/config"
 	"github.com/adityjoshi/iDB/core"
-	"github.com/adityjoshi/iDB/server"
-	"github.com/twitchyliquid64/golang-asm/sys"
 )
 
-var connected_clients int = 0
+var connectedClients int = 0
 
 func AsyncTcpServer() error {
-	log.Println("Asysn Tcp Started on", config.Host, config.Port)
+	log.Println("Async TCP Started on", config.Host, config.Port)
 
-	var max_clients int = 20000
+	maxClients := 20000
+	events := make([]syscall.Kevent_t, maxClients)
 
-	var events []syscall.Kevent_t = make([]syscall.Kevent_t, max_clients)
-
-	serverFD, err := syscall.Socket(syscall.AF_INET, syscall.O_NONBLOCK|syscall.SOCK_STREAM, 0)
+	// Create socket
+	serverFD, err := syscall.Socket(syscall.AF_INET, syscall.SOCK_STREAM, 0)
 	if err != nil {
 		return err
 	}
-
 	defer syscall.Close(serverFD)
 
+	// Set non-blocking
 	if err = syscall.SetNonblock(serverFD, true); err != nil {
 		return err
 	}
 
-	ip4 := net.ParseIP(config.Host)
-
+	// Bind
+	ip4 := net.ParseIP(config.Host).To4()
 	if err = syscall.Bind(serverFD, &syscall.SockaddrInet4{
 		Port: config.Port,
 		Addr: [4]byte{ip4[0], ip4[1], ip4[2], ip4[3]},
@@ -40,66 +38,78 @@ func AsyncTcpServer() error {
 		return err
 	}
 
-	/*
-	* Async event creation
-	* */
-
-	kqFD, err := syscall.Kqueue()
-
-	if err != nil {
+	// Listen
+	if err = syscall.Listen(serverFD, syscall.SOMAXCONN); err != nil {
 		return err
 	}
 
+	// Create kqueue
+	kqFD, err := syscall.Kqueue()
+	if err != nil {
+		return err
+	}
 	defer syscall.Close(kqFD)
 
-	var socketServerEvents syscall.Kevent_t = syscall.Kevent_t{
+	// Register server FD
+	serverEvent := syscall.Kevent_t{
 		Ident:  uint64(serverFD),
 		Filter: syscall.EVFILT_READ,
 		Flags:  syscall.EV_ADD,
 	}
 
-	if _, err = syscall.Kevent(kqFD, []syscall.Kevent_t{socketServerEvents}, nil, nil); err != nil {
+	if _, err = syscall.Kevent(kqFD, []syscall.Kevent_t{serverEvent}, nil, nil); err != nil {
 		return err
 	}
 
 	for {
-
-		newEvents, err := syscall.Kevent(kqFD, nil, events[:], nil)
+		nEvents, err := syscall.Kevent(kqFD, nil, events, nil)
 		if err != nil {
 			return err
 		}
 
-		for i := 0; i < newEvents; i++ {
-			if int(events[i].Ident) == serverFD {
-				fd, _, err := syscall.Accept(serverFD)
+		for i := 0; i < nEvents; i++ {
+			fd := int(events[i].Ident)
+
+			// 🔹 New connection
+			if fd == serverFD {
+				clientFD, _, err := syscall.Accept(serverFD)
 				if err != nil {
-					log.Println("error", err)
+					log.Println("accept error:", err)
 					continue
 				}
 
-				connected_clients++
-				syscall.SetNonblock(serverFD, true)
+				connectedClients++
 
-				var socketClientEvents syscall.Kevent_t = syscall.Kevent_t{
-					Ident:  uint64(serverFD),
+				// Set client non-blocking
+				syscall.SetNonblock(clientFD, true)
+
+				// Register client FD
+				clientEvent := syscall.Kevent_t{
+					Ident:  uint64(clientFD),
 					Filter: syscall.EVFILT_READ,
 					Flags:  syscall.EV_ADD,
 				}
 
-				if _, err := syscall.Kevent(fd, []syscall.Kevent_t{socketClientEvents}, nil, nil); err != nil {
-					log.Fatal(err)
-				} else {
-					comm := core.FileDescriptor{FD: int(events[i].FD)}
-					cmd, err := readCommand(comm)
-					if err != nil {
-						syscall.Close(int(events[i].FD))
-						connected_clients -= 1
-						continue
-					}
-					respond(cmd, comm)
+				if _, err := syscall.Kevent(kqFD, []syscall.Kevent_t{clientEvent}, nil, nil); err != nil {
+					log.Println("kqueue register error:", err)
+					syscall.Close(clientFD)
+					continue
 				}
+
+			} else {
+				// Handle client request
+				comm := core.FileDescriptor{FD: fd}
+
+				cmd, err := readCommand(comm)
+
+				if err != nil {
+					syscall.Close(fd)
+					connectedClients--
+					continue
+				}
+
+				respond(cmd, comm)
 			}
 		}
 	}
-
 }

@@ -29,6 +29,6 @@ If Steve Jobs ever built a database, he’d call it iDB
 iDB started 🚨
 `)
 
-	server.RunTcpServer()
+	server.AsyncTcpServer()
 
 }
