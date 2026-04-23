@@ -4,7 +4,10 @@ import (
 	"errors"
 	"io"
 	"strconv"
+	"time"
 )
+
+var RESP_NIL []byte = []byte("$-1\r\n")
 
 func evalPing(args []string, c io.ReadWriter) error {
 	var b []byte
@@ -54,6 +57,27 @@ func evalSet(args []string, c io.ReadWriter) error {
 
 	PUT(key, NewObj(val, expiraryDuration))
 	c.Write([]byte("+OK\r\n"))
+	return nil
+}
+
+func evalGet(args []string, c io.ReadWriter) error {
+	if len(args) != 1 {
+		return errors.New("(error) wrong number of arguments for the get command")
+	}
+
+	var key string = args[0]
+
+	Object := Get(key)
+
+	if Object == nil {
+		c.Write(RESP_NIL)
+	}
+
+	if Object.ExpiresAt != -1 && Object.ExpiresAt <= time.Now().UnixMilli() {
+		c.Write(RESP_NIL)
+	}
+
+	c.Write(Encode(Object.Value, false))
 	return nil
 }
 
