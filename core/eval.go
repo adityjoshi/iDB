@@ -91,7 +91,12 @@ func evalTTL(args []string, c io.ReadWriter) error {
 	Object := Get(key)
 
 	if Object == nil {
-		c.Write([]byte(":2\r\n"))
+		c.Write([]byte(":-2\r\n"))
+		return nil
+	}
+
+	if Object.ExpiresAt == -1 {
+		c.Write([]byte(":-1\r\n"))
 		return nil
 	}
 
