@@ -37,7 +37,6 @@ func Get(key string) *Object {
 
 	if value != nil {
 		if value.ExpiresAt != -1 && value.ExpiresAt <= time.Now().UnixMilli() {
-			// TODO: delete
 			delete(store, key)
 			return nil
 		}
