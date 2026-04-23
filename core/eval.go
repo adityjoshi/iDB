@@ -90,11 +90,12 @@ func evalTTL(args []string, c io.ReadWriter) error {
 
 	Object := Get(key)
 
+	// returns -2 if the key doesn't exist
 	if Object == nil {
 		c.Write([]byte(":-2\r\n"))
 		return nil
 	}
-
+	// return -1 if the key exist but has no associated expire
 	if Object.ExpiresAt == -1 {
 		c.Write([]byte(":-1\r\n"))
 		return nil
