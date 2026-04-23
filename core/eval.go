@@ -129,6 +129,26 @@ func evalExpire(args []string, c io.ReadWriter) error {
 	if len(args) <= 1 {
 		return errors.New("(error) invalid number of arguments for expire command")
 	}
+
+	var key string = args[0]
+	expiraryDurationSec, err := strconv.ParseInt(args[1], 10, 64)
+
+	if err != nil {
+		return errors.New("(error) Invalid value either it is not integer or out of range")
+	}
+
+	Object := Get(key)
+
+	if Object == nil {
+		c.Write([]byte(":0\r\n"))
+		return nil
+	}
+
+	Object.ExpiresAt = time.Now().UnixMilli() + expiraryDurationSec*1000
+
+	// send 1 if the expiration is set
+	c.Write([]byte(":1\r\n"))
+	return nil
 }
 
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
@@ -144,9 +164,14 @@ func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 	case "GET":
 		return evalGet(cmd.Args, c)
 
-	case "TTl":
+	case "TTL":
 		return evalTTL(cmd.Args, c)
 
+	case "DEL":
+		return evalDel(cmd.Args, c)
+
+	case "EXPIRE":
+		return evalExpire(cmd.Args, c)
 	default:
 		return evalPing(cmd.Args, c)
 	}
