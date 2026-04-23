@@ -55,7 +55,7 @@ func evalSet(args []string, c io.ReadWriter) error {
 		}
 	}
 
-	PUT(key, NewObj(val, expiraryDuration))
+	Put(key, NewObj(val, expiraryDuration))
 	c.Write([]byte("+OK\r\n"))
 	return nil
 }
@@ -77,13 +77,22 @@ func evalGet(args []string, c io.ReadWriter) error {
 		c.Write(RESP_NIL)
 	}
 
-	c.Write(Encode(Object.Value, false))
+	c.Write(Encode(Object.value, false))
 	return nil
 }
 
 func evalTTL(args []string, c io.ReadWriter) error {
 	if len(args) != 1 {
 		return errors.New("(error) Wrong number of arguments for the TTL Command")
+	}
+
+	var key string = args[0]
+
+	Object := Get(key)
+
+	if Object == nil {
+		c.Write([]byte(":2\r\n"))
+		return nil
 	}
 
 }
