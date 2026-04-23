@@ -45,3 +45,13 @@ func Get(key string) *Object {
 
 	return value
 }
+
+func Del(key string) bool {
+	if _, ok := store[key]; ok {
+		delete(store, key)
+		return true
+	}
+
+	return false
+
+}
