@@ -64,6 +64,9 @@ func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 	case "PING":
 		return evalPing(cmd.Args, c)
 
+	case "SET":
+		return evalSet(cmd.Args, c)
+
 	default:
 		return evalPing(cmd.Args, c)
 	}
