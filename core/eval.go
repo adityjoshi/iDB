@@ -100,6 +100,16 @@ func evalTTL(args []string, c io.ReadWriter) error {
 		return nil
 	}
 
+	durationMS := Object.ExpiresAt - time.Now().UnixMilli()
+
+	if durationMS < 0 {
+		c.Write([]byte(":-2\r\n"))
+		return nil
+	}
+
+	c.Write(Encode(int64(durationMS/1000), false))
+	return nil
+
 }
 
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
