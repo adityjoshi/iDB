@@ -4,12 +4,15 @@ import (
 	"log"
 	"net"
 	"syscall"
+	"time"
 
 	"github.com/adityjoshi/iDB/config"
 	"github.com/adityjoshi/iDB/core"
 )
 
 var connectedClients int = 0
+var cronFrequency time.Duration = 1 * time.Second
+var lastCronExecTime time.Time = time.Now()
 
 func AsyncTcpServer() error {
 	log.Println("Async TCP Started on", config.Host, config.Port)
@@ -62,6 +65,14 @@ func AsyncTcpServer() error {
 	}
 
 	for {
+
+		// cron events
+
+		if time.Now().After(lastCronExecTime.Add(cronFrequency)) {
+			core.DeleteExpiredKey()
+			lastCronExecTime = time.Now()
+		}
+
 		nEvents, err := syscall.Kevent(kqFD, nil, events, nil)
 		if err != nil {
 			return err
