@@ -27,3 +27,7 @@ func NewObj(value interface{}, expiresAtMS int64) *Object {
 		ExpiresAt: expiresAt,
 	}
 }
+
+func Put(key string, obj *Object) {
+	store[key] = obj
+}
