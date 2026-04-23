@@ -4,9 +4,15 @@ import (
 	"time"
 )
 
+var store map[string]*Object
+
 type Object struct {
 	value     interface{}
 	ExpiresAt int64
+}
+
+func init() {
+	store = make(map[string]*Object)
 }
 
 func NewObj(value interface{}, expiresAtMS int64) *Object {
