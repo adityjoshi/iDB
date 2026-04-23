@@ -31,3 +31,16 @@ func NewObj(value interface{}, expiresAtMS int64) *Object {
 func Put(key string, obj *Object) {
 	store[key] = obj
 }
+
+func Get(key string) *Object {
+	value := store[key]
+
+	if value != nil {
+		if value.ExpiresAt != -1 && value.ExpiresAt <= time.Now.UnixMilli() {
+			delete(store, key)
+			return nil
+		}
+	}
+
+	return value
+}
