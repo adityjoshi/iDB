@@ -113,6 +113,18 @@ func evalTTL(args []string, c io.ReadWriter) error {
 
 }
 
+func evalDel(args []string, c io.ReadWriter) error {
+	var countDelete int = 0
+
+	for _, key := range args {
+		if ok := Del(key); ok {
+			countDelete++
+		}
+	}
+	c.Write(Encode(countDelete, false))
+	return nil
+}
+
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 
 	switch cmd.Cmd {
