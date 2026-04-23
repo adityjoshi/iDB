@@ -1,6 +1,9 @@
 package core
 
-import "time"
+import (
+	"log"
+	"time"
+)
 
 func expirySample() float32 {
 	var keyLimit int = 20
@@ -21,4 +24,16 @@ func expirySample() float32 {
 		}
 	}
 	return float32(expiredCount) / float32(20)
+}
+
+func DeleteExpiredKey() {
+	for {
+		fraction := expirySample()
+
+		if fraction < 0.25 {
+
+			break
+		}
+	}
+	log.Println("Deleted the expired but undeleted keys", len(store))
 }
