@@ -81,6 +81,13 @@ func evalGet(args []string, c io.ReadWriter) error {
 	return nil
 }
 
+func evalTTL(args []string, c io.ReadWriter) error {
+	if len(args) != 1 {
+		return errors.New("(error) Wrong number of arguments for the TTL Command")
+	}
+
+}
+
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 
 	switch cmd.Cmd {
@@ -93,6 +100,9 @@ func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 
 	case "GET":
 		return evalGet(cmd.Args, c)
+
+	case "TTl":
+		return evalTTL(cmd.Args, c)
 
 	default:
 		return evalPing(cmd.Args, c)
