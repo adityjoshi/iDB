@@ -125,6 +125,12 @@ func evalDel(args []string, c io.ReadWriter) error {
 	return nil
 }
 
+func evalExpire(args []string, c io.ReadWriter) error {
+	if len(args) <= 1 {
+		return errors.New("(error) invalid number of arguments for expire command")
+	}
+}
+
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
 
 	switch cmd.Cmd {
