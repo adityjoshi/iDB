@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"io"
+	"strconv"
 )
 
 func evalPing(args []string, c io.ReadWriter) error {
@@ -21,6 +22,39 @@ func evalPing(args []string, c io.ReadWriter) error {
 	_, err := c.Write(b)
 	return err
 
+}
+
+func evalSet(args []string, c io.ReadWriter) error {
+	if len(args) <= 1 {
+		return errors.New("(error) invalid number of arguments")
+	}
+
+	var key, val string
+	var expiraryDuration int64 = -1
+
+	key, val = args[0], args[1]
+
+	for i := 2; i < len(args); i++ {
+		switch args[i] {
+		case "EX", "ex":
+			i++
+			if i == len(args) {
+				return errors.New("(error) syntax error")
+			}
+			expiraryDurationMS, err := strconv.ParseInt(args[3], 10, 64)
+
+			if err != nil {
+				return errors.New("(error) this value is not an integer or out of range")
+			}
+			expiraryDuration = expiraryDurationMS * 1000
+		default:
+			return errors.New("(error) syntax error")
+		}
+	}
+
+	PUT(key, NewObj(val, expiraryDuration))
+	c.Write([]byte("+OK\r\n"))
+	return nil
 }
 
 func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
