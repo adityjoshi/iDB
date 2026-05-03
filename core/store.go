@@ -2,6 +2,8 @@ package core
 
 import (
 	"time"
+
+	"github.com/adityjoshi/iDB/config"
 )
 
 var store map[string]*Object
@@ -29,6 +31,9 @@ func NewObj(value interface{}, expiresAtMS int64) *Object {
 }
 
 func Put(key string, obj *Object) {
+	if len(store) >= config.KeysLimit {
+		evict()
+	}
 	store[key] = obj
 }
 
