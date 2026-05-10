@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"strconv"
@@ -151,29 +152,37 @@ func evalExpire(args []string, c io.ReadWriter) error {
 	return nil
 }
 
-func EvaluateAndResponse(cmd *RedisCmd, c io.ReadWriter) error {
+func EvaluateAndResponse(cmds RedisCmd, c io.ReadWriter) {
 
-	switch cmd.Cmd {
+	var response []byte
+	buf := bytes.NewBuffer(response)
 
-	case "PING":
-		return evalPing(cmd.Args, c)
+	for _, cmd := range cmds {
+		switch cmd.Cmd {
 
-	case "SET":
-		return evalSet(cmd.Args, c)
+		case "PING":
+			buf.Write(evalPing(cmd.Args))
 
-	case "GET":
-		return evalGet(cmd.Args, c)
+		case "SET":
+			buf.Write(evalSet(cmd.Args))
 
-	case "TTL":
-		return evalTTL(cmd.Args, c)
+		case "GET":
+			buf.Write(evalGet(cmd.Args))
 
-	case "DEL":
-		return evalDel(cmd.Args, c)
+		case "TTL":
+			buf.Write(evalTTL(cmd.Args))
 
-	case "EXPIRE":
-		return evalExpire(cmd.Args, c)
-	default:
-		return evalPing(cmd.Args, c)
+		case "DEL":
+			buf.Write(evalDel(cmd.Args))
+
+		case "BGREWRITEAOF":
+			buf.Write(evalBGREWRITEAOF(cmd.Args))
+
+		case "EXPIRE":
+			buf.Write(evalExpire(cmd.Args))
+		default:
+			buf.Write(evalPing(cmd.Args))
+		}
 	}
-
+	c.Write(buf.Bytes())
 }
