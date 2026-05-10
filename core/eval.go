@@ -10,6 +10,8 @@ import (
 
 var RESP_NIL []byte = []byte("$-1\r\n")
 var RESP_OK []byte = []byte("+OK\r\n")
+var RESP_MINUS_1 []byte = []byte(":-1\r\n")
+var RESP_MINUS_2 []byte = []byte(":-2\r\n")
 
 func evalPing(args []string) []byte {
 	var b []byte
@@ -80,9 +82,9 @@ func evalGet(args []string) []byte {
 	return Encode(Object.value, false)
 }
 
-func evalTTL(args []string, c io.ReadWriter) error {
+func evalTTL(args []string, c io.ReadWriter) []byte {
 	if len(args) != 1 {
-		return errors.New("(error) Wrong number of arguments for the TTL Command")
+		return Encode(errors.New("(error) Wrong number of arguments for the TTL Command"), false)
 	}
 
 	var key string = args[0]
@@ -91,24 +93,23 @@ func evalTTL(args []string, c io.ReadWriter) error {
 
 	// returns -2 if the key doesn't exist
 	if Object == nil {
-		c.Write([]byte(":-2\r\n"))
-		return nil
+		return RESP_MINUS_2
 	}
 	// return -1 if the key exist but has no associated expire
 	if Object.ExpiresAt == -1 {
-		c.Write([]byte(":-1\r\n"))
-		return nil
+		return RESP_MINUS_1
 	}
 
+	/*
+	* Compute the time remaining for the key
+	* */
 	durationMS := Object.ExpiresAt - time.Now().UnixMilli()
 
 	if durationMS < 0 {
-		c.Write([]byte(":-2\r\n"))
-		return nil
+		return RESP_MINUS_2
 	}
 
-	c.Write(Encode(int64(durationMS/1000), false))
-	return nil
+	return Encode(int64(durationMS/1000), false)
 
 }
 
