@@ -110,29 +110,6 @@ func DecodeOne(data []byte) (interface{}, int, error) {
 
 }
 
-func Decode(data []byte) (interface{}, error) {
-	if len(data) == 0 {
-		return nil, errors.New("no data")
-	}
-	val, _, err := DecodeOne(data)
-	return val, err
-}
-
-func DecodeArrayString(data []byte) ([]string, error) {
-	val, err := Decode(data)
-	if err != nil {
-		return nil, err
-	}
-
-	tokesString := val.([]interface{})
-	tokens := make([]string, len(tokesString))
-
-	for i := range tokens {
-		tokens[i] = tokesString[i].(string)
-	}
-	return tokens, nil
-}
-
 func encodeString(v string) []byte {
 	return []byte(fmt.Sprintf("$%d\r\n%s\r\n", len(v), v))
 }
@@ -160,5 +137,4 @@ func Encode(val interface{}, isSimple bool) []byte {
 		return RESP_NIL
 	}
 
-	return []byte{}
 }
