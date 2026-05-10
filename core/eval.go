@@ -10,6 +10,8 @@ import (
 
 var RESP_NIL []byte = []byte("$-1\r\n")
 var RESP_OK []byte = []byte("+OK\r\n")
+var RESP_ZERO []byte = []byte(":0\r\n")
+var RESP_ONE []byte = []byte(":1\r\n")
 var RESP_MINUS_1 []byte = []byte(":-1\r\n")
 var RESP_MINUS_2 []byte = []byte(":-2\r\n")
 
@@ -124,30 +126,28 @@ func evalDel(args []string, c io.ReadWriter) []byte {
 	return Encode(countDelete, false)
 }
 
-func evalExpire(args []string, c io.ReadWriter) error {
+func evalExpire(args []string, c io.ReadWriter) []byte {
 	if len(args) <= 1 {
-		return errors.New("(error) invalid number of arguments for expire command")
+		return Encode(errors.New("(error) invalid number of arguments for expire command"), false)
 	}
 
 	var key string = args[0]
 	expiraryDurationSec, err := strconv.ParseInt(args[1], 10, 64)
 
 	if err != nil {
-		return errors.New("(error) Invalid value either it is not integer or out of range")
+		return Encode(errors.New("(error) Invalid value either it is not integer or out of range"), false)
 	}
 
 	Object := Get(key)
 
 	if Object == nil {
-		c.Write([]byte(":0\r\n"))
-		return nil
+		return RESP_ZERO
 	}
 
 	Object.ExpiresAt = time.Now().UnixMilli() + expiraryDurationSec*1000
 
 	// send 1 if the expiration is set
-	c.Write([]byte(":1\r\n"))
-	return nil
+	return RESP_ONE
 }
 
 func EvaluateAndResponse(cmds RedisCmds, c io.ReadWriter) {
