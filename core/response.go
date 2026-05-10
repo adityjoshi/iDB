@@ -110,6 +110,24 @@ func DecodeOne(data []byte) (interface{}, int, error) {
 
 }
 
+func Decode(data []byte) ([]interface{}, error) {
+	if len(data) == 0 {
+		return nil, errors.New("no data")
+	}
+	var values []interface{} = make([]interface{}, 0)
+	var index int = 0
+
+	for index < len(data) {
+		value, delta, err := DecodeOne(data[index:])
+		if err != nil {
+			return values, err
+		}
+		index = index + delta
+		values = append(values, value)
+	}
+	return values, nil
+}
+
 func encodeString(v string) []byte {
 	return []byte(fmt.Sprintf("$%d\r\n%s\r\n", len(v), v))
 }
