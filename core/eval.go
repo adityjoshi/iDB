@@ -152,7 +152,7 @@ func evalExpire(args []string, c io.ReadWriter) error {
 	return nil
 }
 
-func EvaluateAndResponse(cmds RedisCmd, c io.ReadWriter) {
+func EvaluateAndResponse(cmds RedisCmds, c io.ReadWriter) {
 
 	var response []byte
 	buf := bytes.NewBuffer(response)
