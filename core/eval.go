@@ -10,11 +10,11 @@ import (
 
 var RESP_NIL []byte = []byte("$-1\r\n")
 
-func evalPing(args []string, c io.ReadWriter) error {
+func evalPing(args []string) []byte {
 	var b []byte
 
 	if len(args) >= 2 {
-		return errors.New("Err wrong number of argumnents for ping command\r\n")
+		return Encode(errors.New("Err wrong number of argumnents for ping command"), false)
 	}
 
 	if len(args) == 0 {
@@ -23,8 +23,7 @@ func evalPing(args []string, c io.ReadWriter) error {
 		b = Encode(args[0], false)
 	}
 
-	_, err := c.Write(b)
-	return err
+	return b
 
 }
 
