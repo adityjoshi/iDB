@@ -28,13 +28,13 @@ func readCommand(c io.ReadWriter) (core.RedisCmds, error) {
 		return nil, err
 	}
 
-	values, err := core.DecodeArrayString(buf[:n])
+	values, err := core.Decode(buf[:n])
 	if err != nil {
 		return nil, err
 	}
 	var cmds []*core.RedisCmd = make([]*core.RedisCmd, 0)
 
-	for _, val := range values {
+	for _, value := range values {
 		tokens, err := toArrayString(value.([]interface{}))
 		if err != nil {
 			return nil, err
