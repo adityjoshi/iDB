@@ -5,3 +5,4 @@ var Port int = 1926
 var KeysLimit int = 5
 
 var EvictionStrategy string = "simple-first"
+var AOFFILE string = "./idb-master.aof"
