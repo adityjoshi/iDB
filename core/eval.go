@@ -113,7 +113,7 @@ func evalTTL(args []string, c io.ReadWriter) []byte {
 
 }
 
-func evalDel(args []string, c io.ReadWriter) error {
+func evalDel(args []string, c io.ReadWriter) []byte {
 	var countDelete int = 0
 
 	for _, key := range args {
@@ -121,8 +121,7 @@ func evalDel(args []string, c io.ReadWriter) error {
 			countDelete++
 		}
 	}
-	c.Write(Encode(countDelete, false))
-	return nil
+	return Encode(countDelete, false)
 }
 
 func evalExpire(args []string, c io.ReadWriter) error {
