@@ -132,6 +132,10 @@ func DecodeArrayString(data []byte) ([]string, error) {
 	return tokens, nil
 }
 
+func encodeString(v string) []byte {
+	return []byte(fmt.Sprintf("$%d\r\n%s\r\n", len(v), v))
+}
+
 func Encode(val interface{}, isSimple bool) []byte {
 	switch v := val.(type) {
 	case string:
