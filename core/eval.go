@@ -9,6 +9,7 @@ import (
 )
 
 var RESP_NIL []byte = []byte("$-1\r\n")
+var RESP_OK []byte = []byte("+OK\r\n")
 
 func evalPing(args []string) []byte {
 	var b []byte
@@ -27,9 +28,9 @@ func evalPing(args []string) []byte {
 
 }
 
-func evalSet(args []string, c io.ReadWriter) error {
+func evalSet(args []string) []byte {
 	if len(args) <= 1 {
-		return errors.New("(error) invalid number of arguments")
+		return Encode(errors.New("(error) invalid number of arguments"), false)
 	}
 
 	var key, val string
@@ -42,22 +43,21 @@ func evalSet(args []string, c io.ReadWriter) error {
 		case "EX", "ex":
 			i++
 			if i == len(args) {
-				return errors.New("(error) syntax error")
+				return Encode(errors.New("(error) syntax error"), false)
 			}
 			expiraryDurationMS, err := strconv.ParseInt(args[3], 10, 64)
 
 			if err != nil {
-				return errors.New("(error) this value is not an integer or out of range")
+				return Encode(errors.New("(error) this value is not an integer or out of range"), false)
 			}
 			expiraryDuration = expiraryDurationMS * 1000
 		default:
-			return errors.New("(error) syntax error")
+			return Encode(errors.New("(error) syntax error"), false)
 		}
 	}
 
 	Put(key, NewObj(val, expiraryDuration))
-	c.Write([]byte("+OK\r\n"))
-	return nil
+	return RESP_OK
 }
 
 func evalGet(args []string, c io.ReadWriter) error {
