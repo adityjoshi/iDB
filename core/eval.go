@@ -84,7 +84,7 @@ func evalGet(args []string) []byte {
 	return Encode(Object.value, false)
 }
 
-func evalTTL(args []string, c io.ReadWriter) []byte {
+func evalTTL(args []string) []byte {
 	if len(args) != 1 {
 		return Encode(errors.New("(error) Wrong number of arguments for the TTL Command"), false)
 	}
@@ -115,7 +115,7 @@ func evalTTL(args []string, c io.ReadWriter) []byte {
 
 }
 
-func evalDel(args []string, c io.ReadWriter) []byte {
+func evalDel(args []string) []byte {
 	var countDelete int = 0
 
 	for _, key := range args {
@@ -126,7 +126,7 @@ func evalDel(args []string, c io.ReadWriter) []byte {
 	return Encode(countDelete, false)
 }
 
-func evalExpire(args []string, c io.ReadWriter) []byte {
+func evalExpire(args []string) []byte {
 	if len(args) <= 1 {
 		return Encode(errors.New("(error) invalid number of arguments for expire command"), false)
 	}
@@ -148,6 +148,11 @@ func evalExpire(args []string, c io.ReadWriter) []byte {
 
 	// send 1 if the expiration is set
 	return RESP_ONE
+}
+
+func evalBGREWRITEAOF(args []string) []byte {
+	DUMPALLAOF()
+	return RESP_OK
 }
 
 func EvaluateAndResponse(cmds RedisCmds, c io.ReadWriter) {
