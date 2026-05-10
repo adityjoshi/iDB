@@ -60,9 +60,9 @@ func evalSet(args []string) []byte {
 	return RESP_OK
 }
 
-func evalGet(args []string, c io.ReadWriter) error {
+func evalGet(args []string) []byte {
 	if len(args) != 1 {
-		return errors.New("(error) wrong number of arguments for the get command")
+		return Encode(errors.New("(error) wrong number of arguments for the get command"), false)
 	}
 
 	var key string = args[0]
@@ -70,15 +70,14 @@ func evalGet(args []string, c io.ReadWriter) error {
 	Object := Get(key)
 
 	if Object == nil {
-		c.Write(RESP_NIL)
+		return RESP_NIL
 	}
 
 	if Object.ExpiresAt != -1 && Object.ExpiresAt <= time.Now().UnixMilli() {
-		c.Write(RESP_NIL)
+		return RESP_NIL
 	}
 
-	c.Write(Encode(Object.value, false))
-	return nil
+	return Encode(Object.value, false)
 }
 
 func evalTTL(args []string, c io.ReadWriter) error {
